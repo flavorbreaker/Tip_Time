@@ -5,13 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,13 +40,16 @@ class MainActivity : ComponentActivity() {
 fun TipTimeScreen() {
     var amountInput by remember{mutableStateOf("0")}
 
+    var tipPercent by remember{ mutableStateOf(15.0)}
+
     val amount = amountInput.toDoubleOrNull() ?: 0.0
-    val tip = calculateTip(amount, 15.0)
+    val tip = calculateTip(amount, tipPercent)
 
     Column (
         modifier = Modifier
             .padding(32.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = stringResource(id = R.string.calculate_tip),
@@ -70,6 +71,30 @@ fun TipTimeScreen() {
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
+
+        Spacer(modifier = Modifier.size(32.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Button(onClick = {tipPercent = 15.0}) {
+                Text(text = "15%")
+            }
+
+            Button(onClick = {tipPercent = 20.0}) {
+                Text(text = "20%")
+            }
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Button(onClick = {tipPercent = 25.0}) {
+                Text(text = "25%")
+            }
+
+            Button(onClick = {tipPercent = 30.0}) {
+                Text(text = "30%")
+            }
+        }
+        
+        Text(text = "Current percent: ${tipPercent.toInt()}%")
     }
 }
 
