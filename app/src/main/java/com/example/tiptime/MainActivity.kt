@@ -3,15 +3,20 @@ package com.example.tiptime
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,12 +43,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TipTimeScreen() {
-    var amountInput by remember{mutableStateOf("0")}
+    var amountInput by remember{mutableStateOf("")}
+    var tipInput by remember{ mutableStateOf("")}
 
     var tipPercent by remember{ mutableStateOf(15.0)}
-
     val amount = amountInput.toDoubleOrNull() ?: 0.0
     val tip = calculateTip(amount, tipPercent)
+
+    val focusManager = LocalFocusManager.current
 
     Column (
         modifier = Modifier
@@ -59,9 +66,36 @@ fun TipTimeScreen() {
 
         Spacer(Modifier.height(16.dp))
 
-        EditNumberField(value = amountInput) {
-            amountInput = it
-        }
+        EditNumberField(        //Cost of Service field
+            label = R.string.cost_of_service,
+            value = amountInput,
+            onValueChange = {amountInput = it},
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {focusManager.moveFocus(FocusDirection.Down)}
+            )
+        )
+
+        EditNumberField(        //Custom Tip field
+            label = R.string.custom_tip,
+            value = tipInput,
+            onValueChange = {
+                tipPercent = it.toDoubleOrNull() ?: 0.0
+                tipInput = it
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                }
+            )
+        )
 
         Spacer(Modifier.height(24.dp))
 
@@ -75,21 +109,37 @@ fun TipTimeScreen() {
         Spacer(modifier = Modifier.size(32.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Button(onClick = {tipPercent = 15.0}) {
+            Button(onClick = {
+                tipInput = ""
+                tipPercent = 15.0
+            }
+            ) {
                 Text(text = "15%")
             }
 
-            Button(onClick = {tipPercent = 20.0}) {
+            Button(onClick = {
+                tipInput = ""
+                tipPercent = 20.0
+            }
+            ) {
                 Text(text = "20%")
             }
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Button(onClick = {tipPercent = 25.0}) {
+            Button(onClick = {
+                tipInput = ""
+                tipPercent = 25.0
+            }
+            ) {
                 Text(text = "25%")
             }
 
-            Button(onClick = {tipPercent = 30.0}) {
+            Button(onClick = {
+                tipInput = ""
+                tipPercent = 30.0
+            }
+            ) {
                 Text(text = "30%")
             }
         }
@@ -99,15 +149,22 @@ fun TipTimeScreen() {
 }
 
 @Composable
-fun EditNumberField(value: String, onValueChange: (String) -> Unit) {
+fun EditNumberField(
+    @StringRes label: Int,
+    value: String,
+    onValueChange: (String) -> Unit,
+    keyboardOptions: KeyboardOptions,
+    keyboardActions: KeyboardActions
+) {
     TextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(stringResource(R.string.cost_of_service)) },
+        label = { Text(stringResource(label)) },
 
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions
     )
 }
 
